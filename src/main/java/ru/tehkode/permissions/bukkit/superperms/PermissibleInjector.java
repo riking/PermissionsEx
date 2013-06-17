@@ -78,6 +78,21 @@ public abstract class PermissibleInjector {
 		return permField;
 	}
 
+	public static class FieldNamePermissibleInjector extends PermissibleInjector {
+		public FieldNamePermissibleInjector(String clazz, String field, boolean copyValues, String serverName) {
+			super(clazz, field, copyValues);
+		}
+		
+		@Override
+		public boolean isApplicable(Player player) {
+			try {
+				tryGetField(player);
+				return true;
+			} catch (Throwable t) {
+				return false;
+			}
+		}
+	}
 	public static class ServerNamePermissibleInjector extends PermissibleInjector {
 		protected final String serverName;
 
