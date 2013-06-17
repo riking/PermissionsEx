@@ -30,22 +30,8 @@ public abstract class PermissibleInjector {
 	 * @throws IllegalAccessException when things go very wrong
 	 */
 	public boolean inject(Player player, Permissible permissible) throws NoSuchFieldException, IllegalAccessException {
-		Class humanEntity;
-		try {
-			humanEntity = Class.forName(clazzName);
-		} catch (ClassNotFoundException e) {
-			Logger.getLogger("Minecraft").warning("[PermissionsEx] Unknown server implementation being used!");
-			return false;
-		}
 
-		if (!humanEntity.isAssignableFrom(player.getClass())) {
-			Logger.getLogger("Minecraft").warning("[PermissionsEx] Strange error while injecting permissible!");
-			return false;
-		}
-
-		Field permField = humanEntity.getDeclaredField(fieldName);
-		// Make it public for reflection
-		permField.setAccessible(true);
+		Field permField = tryGetField(player);
 
 		if (copyValues) {
 			PermissibleBase oldBase = (PermissibleBase) permField.get(player);
@@ -69,6 +55,27 @@ public abstract class PermissibleInjector {
 	}
 
 	public abstract boolean isApplicable(Player player);
+
+	public static Field tryGetField(Player p) throws NoSuchFieldException, IllegalAccessException {
+		Class humanEntity;
+		try {
+			humanEntity = Class.forName(clazzName);
+		} catch (ClassNotFoundException e) {
+			Logger.getLogger("Minecraft").warning("[PermissionsEx] Unknown server implementation being used!");
+			return false;
+		}
+
+		if (!humanEntity.isAssignableFrom(player.getClass())) {
+			Logger.getLogger("Minecraft").warning("[PermissionsEx] Strange error while injecting permissible!");
+			return false;
+		}
+
+		Field permField = humanEntity.getDeclaredField(fieldName);
+		// Make it public for reflection
+		permField.setAccessible(true);
+
+		return permField;
+	}
 
 	public static class ServerNamePermissibleInjector extends PermissibleInjector {
 		protected final String serverName;
